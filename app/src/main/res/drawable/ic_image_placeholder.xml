@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Background Rectangle -->
+    <path
+        android:fillColor="#E8EEF4"
+        android:pathData="M2,4C2,2.89543 2.89543,2 4,2H20C21.1046,2 22,2.89543 22,4V20C22,21.1046 21.1046,22 20,22H4C2.89543,22 2,21.1046 2,20V4Z"/>
+
+    <!-- Mountain Icon -->
+    <path
+        android:fillColor="#A4B0BE"
+        android:pathData="M19,18H5L11.5,9L15,13.5L17.5,10.5L19,12.5V18Z"/>
+
+    <!-- Sun/Circle Icon -->
+    <path
+        android:fillColor="#A4B0BE"
+        android:pathData="M7,8C7,6.89543 7.89543,6 9,6C10.1046,6 11,6.89543 11,8C11,9.10457 10.1046,10 9,10C7.89543,10 7,9.10457 7,8Z"/>
+</vector>
