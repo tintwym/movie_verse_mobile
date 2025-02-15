@@ -23,12 +23,11 @@ import dev.team08.movieverse.ui.dashboard.viewmodel.MovieViewModel
 import dev.team08.movieverse.ui.detail.DetailActivity
 import dev.team08.movieverse.utils.AuthManager
 
-class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener, ProfileFragment.LogoutListener {
+class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener {
     private lateinit var binding: ActivityDashboardBinding
     private val viewModel: MovieViewModel by viewModels()
     private lateinit var searchResultsAdapter: MovieAdapter
     private var searchResultsVisible = false
-    private var currentHomeFragment: HomeFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,34 +42,7 @@ class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener, 
 
         if (savedInstanceState == null) {
             showToolbarAndSearch(true)
-            val fromLogin = intent.getBooleanExtra("FROM_LOGIN", false)
-            if (fromLogin) {
-                checkAuthStateAndReload()
-            }
-            loadHomeFragment(true)
-        }
-    }
-
-    override fun onLogout() {
-        AuthManager.clearAuthToken(this)
-        checkAuthStateAndReload()
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
-    }
-
-    private fun checkAuthStateAndReload() {
-        val isLoggedIn = AuthManager.getAuthToken(this) != null
-        viewModel.setLoggedInStatus(isLoggedIn)
-    }
-
-    private fun loadHomeFragment(isInitialLoad: Boolean) {
-        val homeFragment = HomeFragment()
-        currentHomeFragment = homeFragment
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, homeFragment)
-            .commitNow()
-
-        if (!isInitialLoad) {
-            checkAuthStateAndReload()
+            loadFragment(HomeFragment())
         }
     }
 
@@ -79,30 +51,8 @@ class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener, 
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 
-    private fun setupBottomNavigation() {
-        binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_home -> {
-                    showToolbarAndSearch(true)
-                    loadHomeFragment(false)
-                    true
-                }
-                R.id.nav_news -> {
-                    showToolbarAndSearch(true)
-                    loadFragment(NewsFragment())
-                    true
-                }
-                R.id.nav_profile -> {
-                    showToolbarAndSearch(false)
-                    loadFragment(ProfileFragment())
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
     private fun setupSearchResultsRecyclerView() {
+        // Initialize the RecyclerView for search results
         searchResultsAdapter = MovieAdapter { movie ->
             onMovieClicked(movie)
         }
@@ -163,16 +113,25 @@ class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener, 
         binding.noResultsView.visibility = View.GONE
 
         if (!show) {
-            viewModel.reloadCurrentMovies()
+            viewModel.loadPopularMovies() // Reset to popular movies when exiting search
         }
     }
 
     private fun observeViewModel() {
-        viewModel.popularMovies.observe(this) { movies ->
+        viewModel.movies.observe(this) { movies ->
             if (searchResultsVisible) {
                 searchResultsAdapter.submitList(movies)
-                binding.noResultsView.visibility = if (movies.isEmpty()) View.VISIBLE else View.GONE
+                binding.noResultsView.visibility =
+                    if (movies.isEmpty()) View.VISIBLE else View.GONE
+            } else {
+                // Update your HomeFragment's movie list
+                val homeFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? HomeFragment
+                homeFragment?.updateMovies(movies)
             }
+        }
+
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
         viewModel.error.observe(this) { error ->
@@ -182,11 +141,35 @@ class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener, 
         }
     }
 
+    private fun setupBottomNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    showToolbarAndSearch(true)
+                    loadFragment(HomeFragment())
+                    true
+                }
+                R.id.nav_news -> {
+                    showToolbarAndSearch(true)
+                    loadFragment(NewsFragment())
+                    true
+                }
+                R.id.nav_profile -> {
+                    showToolbarAndSearch(false)
+                    loadFragment(ProfileFragment())
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
     private fun showToolbarAndSearch(show: Boolean) {
         binding.toolbar.visibility = if (show) View.VISIBLE else View.GONE
-        binding.searchView.parent?.let { parent ->
+        binding.searchView.parent.let { parent ->
             (parent as? View)?.visibility = if (show) View.VISIBLE else View.GONE
         }
+        binding.scrollView.scrollTo(0, 0)
     }
 
     private fun loadFragment(fragment: Fragment) {

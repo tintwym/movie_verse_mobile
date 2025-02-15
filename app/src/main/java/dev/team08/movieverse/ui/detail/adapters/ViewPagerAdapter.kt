@@ -1,4 +1,4 @@
-package dev.team08.movieverse.ui.detail
+package dev.team08.movieverse.ui.detail.adapters
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment

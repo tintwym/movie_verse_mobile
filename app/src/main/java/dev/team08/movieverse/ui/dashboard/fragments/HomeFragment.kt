@@ -31,7 +31,8 @@ class HomeFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -41,18 +42,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        checkAuthAndLoadMovies()
         observeViewModel()
     }
 
-    private fun checkAuthAndLoadMovies() {
-        val isLoggedIn = AuthManager.getAuthToken(requireContext()) != null
-        binding.recommendedTitleText.isVisible = isLoggedIn
-        binding.recommendedMoviesRecyclerView.isVisible = isLoggedIn
-
-        if (viewModel.movies.value.isNullOrEmpty()) {
-            viewModel.setLoggedInStatus(isLoggedIn)
-        }
+    fun updateMovies(movies: List<Movie>) {
+        movieAdapter.submitList(movies)
     }
 
     private fun setupRecyclerView() {
@@ -68,21 +62,13 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.movies.observe(viewLifecycleOwner) { movies ->
-            if (isAdded) {
-                movieAdapter.submitList(movies)
-                binding.moviesRecyclerView.isVisible = movies.isNotEmpty()
-            }
-        }
-
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            if (isAdded) {
-                binding.progressBar.isVisible = isLoading
-            }
+            movieAdapter.submitList(movies)
+            binding.moviesRecyclerView.isVisible = movies.isNotEmpty()
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
-            if (isAdded && error != null) {
-                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            error?.let {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
         }
     }

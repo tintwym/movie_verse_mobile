@@ -14,13 +14,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MovieViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = MovieRepository()
-
-    private val _popularMovies = MutableLiveData<List<Movie>>()
-    val popularMovies: LiveData<List<Movie>> = _popularMovies
-
-    private val _recommendedMovies = MutableLiveData<List<Movie>>()
-    val recommendedMovies: LiveData<List<Movie>> = _recommendedMovies
+    private val _movies = MutableLiveData<List<Movie>>()
+    val movies: LiveData<List<Movie>> = _movies
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -31,53 +26,42 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     private val _upcomingMovies = MutableLiveData<List<Movie>>()
     val upcomingMovies: LiveData<List<Movie>> = _upcomingMovies
 
-    private var isLoggedIn = false
-    private var currentJob: Job? = null
-
     init {
         loadPopularMovies()
     }
 
-    fun setLoggedInStatus(status: Boolean) {
-        if (isLoggedIn == status) return
-        isLoggedIn = status
-
-        loadPopularMovies()
-        if (isLoggedIn) {
-            loadRecommendedMovies()
-        } else {
-            _recommendedMovies.value = emptyList()
-        }
-    }
-
-    private fun loadRecommendedMovies() {
-        Log.d("MovieViewModel", "Loading recommended movies")
+    fun loadPopularMovies() {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-                val moviesList = repository.getMoviesByIds(RECOMMENDED_MOVIE_IDS, Constants.API_KEY)
-                Log.d("MovieViewModel", "Loaded ${moviesList.size} recommended movies")
-                if (moviesList.isNotEmpty()) {
-                    _recommendedMovies.value = moviesList
-                } else {
-                    _error.value = "No recommended movies found"
-                }
+                val response = MovieApiClient.apiService.getPopularMovies()
+                _movies.value = response.results
             } catch (e: Exception) {
-                Log.e("MovieViewModel", "Error loading recommended movies", e)
+                Log.e("MovieViewModel", "Error loading movies", e)
                 _error.value = e.message
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
-    private fun loadPopularMovies() {
+    fun searchMovies(query: String) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+
             try {
-                val moviesList = repository.getPopularMovies(Constants.API_KEY)
-                _popularMovies.value = moviesList
+                val response = MovieApiClient.apiService.searchMovies(query)
+                if (response.results.isNotEmpty()) {
+                    _movies.value = response.results  // Update the same movies LiveData
+                } else {
+                    _movies.value = emptyList()
+                    _error.value = "No movies found for '$query'"
+                }
             } catch (e: Exception) {
-                Log.e("MovieViewModel", "Error loading popular movies", e)
-                _error.value = e.message
+                Log.e("MovieViewModel", "Error searching movies", e)
+                _error.value = "Error searching movies: ${e.message}"
+                _movies.value = emptyList()
             } finally {
                 _isLoading.value = false
             }
@@ -87,59 +71,15 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     fun loadUpcomingMovies() {
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null
             try {
-                val response = MovieApiClient.apiService.getUpcomingMovies(Constants.API_KEY)
+                val response = MovieApiClient.apiService.getUpcomingMovies()
                 _upcomingMovies.value = response.results
-                Log.d("MovieViewModel", "Loaded ${response.results.size} upcoming movies")
             } catch (e: Exception) {
                 Log.e("MovieViewModel", "Error loading upcoming movies", e)
                 _error.value = e.message
-                _upcomingMovies.value = emptyList()
             } finally {
                 _isLoading.value = false
             }
         }
-    }
-
-    fun searchMovies(query: String) {
-        currentJob?.cancel()
-        currentJob = viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-            try {
-                val response = MovieApiClient.apiService.searchMovies(query)
-                if (response.results.isNotEmpty()) {
-                    _popularMovies.value = response.results
-                    _recommendedMovies.value = emptyList()
-                } else {
-                    _popularMovies.value = emptyList()
-                    _recommendedMovies.value = emptyList()
-                    _error.value = "No movies found for '$query'"
-                }
-            } catch (e: Exception) {
-                Log.e("MovieViewModel", "Error searching movies", e)
-                _error.value = "Error searching movies: ${e.message}"
-                _popularMovies.value = emptyList()
-                _recommendedMovies.value = emptyList()
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun reloadCurrentMovies() {
-        loadPopularMovies()
-        if (isLoggedIn) {
-            loadRecommendedMovies()
-        }
-    }
-
-    companion object {
-        private val RECOMMENDED_MOVIE_IDS = listOf(
-            916035, 464446, 320367, 50472, 1975, 11811, 46441, 7978,
-            13788, 513268, 560362, 323368, 632357, 10900, 287084,
-            11456, 45650, 13803, 10555, 291413
-        )
     }
 }
