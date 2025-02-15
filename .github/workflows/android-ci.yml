@@ -40,5 +40,5 @@ jobs:
       - name: Upload APK Build ZIP as Artifact
         uses: actions/upload-artifact@v4  # ✅ Updated version
         with:
-          name: apk-build-zip
+          name: apk-build
           path: apk-build.zip
