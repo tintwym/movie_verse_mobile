@@ -11,7 +11,8 @@ import retrofit2.http.Query
 interface MovieApiService {
     @GET("movie/popular")
     suspend fun getPopularMovies(
-        @Query("api_key") apiKey: String = Constants.API_KEY
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("include_adult") includeAdult: Boolean = false
     ): MovieResponse
 
     @GET("search/movie")
@@ -27,17 +28,20 @@ interface MovieApiService {
     suspend fun getUpcomingMovies(
         @Query("api_key") apiKey: String = Constants.API_KEY,
         @Query("language") language: String = "en-US",
+        @Query("include_adult") includeAdult: Boolean = false,
         @Query("page") page: Int = 1
     ): MovieResponse
 
     @GET("genre/movie/list")
     suspend fun getGenres(
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
+        @Query("include_adult") includeAdult: Boolean = false
     ): GenreResponse
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
         @Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
+        @Query("include_adult") includeAdult: Boolean = false
     ): MovieDetailResponse
 }

@@ -16,6 +16,7 @@ import dev.team08.movieverse.R
 import dev.team08.movieverse.databinding.ActivityRegisterBinding
 import dev.team08.movieverse.ui.genre.GenreActivity
 import com.google.android.material.snackbar.Snackbar
+import dev.team08.movieverse.ui.login.LoginActivity
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -27,6 +28,11 @@ class RegisterActivity : AppCompatActivity() {
 
         setupTermsAndConditions()
         setupNextButton()
+
+        binding.goToLoginButton.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish() // This will close the current activity
+        }
     }
 
     private fun setupTermsAndConditions() {
@@ -85,8 +91,8 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun navigateToGenreSelection() {
-        val username = binding.nameInput.editText?.text.toString()
-        val email = binding.emailInput.editText?.text.toString()
+        val username = binding.nameInput.editText?.text.toString().trim()
+        val email = binding.emailInput.editText?.text.toString().trim()
         val password = binding.passwordInput.editText?.text.toString()
 
         Intent(this, GenreActivity::class.java).apply {
@@ -101,21 +107,35 @@ class RegisterActivity : AppCompatActivity() {
         var isValid = true
 
         // Validate name
-        val name = binding.nameInput.editText?.text.toString()
-        if (!isValidName(name)) {
-            binding.nameInput.error = "Name must be at least 2 characters with no numbers or special characters"
-            isValid = false
-        } else {
-            binding.nameInput.error = null
+        val name = binding.nameInput.editText?.text.toString().trim()
+        when {
+            name.isEmpty() -> {
+                binding.nameInput.error = "Name is required"
+                isValid = false
+            }
+            !isValidName(name) -> {
+                binding.nameInput.error = "Name must be at least 5 characters with no numbers or special characters"
+                isValid = false
+            }
+            else -> {
+                binding.nameInput.error = null
+            }
         }
 
         // Validate email
-        val email = binding.emailInput.editText?.text.toString()
-        if (!isValidEmail(email)) {
-            binding.emailInput.error = "Please enter a valid email address"
-            isValid = false
-        } else {
-            binding.emailInput.error = null
+        val email = binding.emailInput.editText?.text.toString().trim()
+        when {
+            email.isEmpty() -> {
+                binding.emailInput.error = "Email is required"
+                isValid = false
+            }
+            !isValidEmail(email) -> {
+                binding.emailInput.error = "Please enter a valid email address"
+                isValid = false
+            }
+            else -> {
+                binding.emailInput.error = null
+            }
         }
 
         // Validate password
@@ -123,18 +143,30 @@ class RegisterActivity : AppCompatActivity() {
         val confirmPassword = binding.confirmPasswordInput.editText?.text.toString()
 
         when {
-            password.length < 6 -> {
-                binding.passwordInput.error = "Password must be at least 6 characters"
-                binding.confirmPasswordInput.error = null
+            password.isEmpty() -> {
+                binding.passwordInput.error = "Password is required"
                 isValid = false
             }
-            password != confirmPassword -> {
-                binding.confirmPasswordInput.error = "Passwords don't match"
-                binding.passwordInput.error = null
+            !isValidPassword(password) -> {
+                binding.passwordInput.error = "Password must be at least 6 characters and contain 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
                 isValid = false
             }
             else -> {
                 binding.passwordInput.error = null
+            }
+        }
+
+        // Validate confirm password
+        when {
+            confirmPassword.isEmpty() -> {
+                binding.confirmPasswordInput.error = "Confirm password is required"
+                isValid = false
+            }
+            password != confirmPassword -> {
+                binding.confirmPasswordInput.error = "Passwords don't match"
+                isValid = false
+            }
+            else -> {
                 binding.confirmPasswordInput.error = null
             }
         }
@@ -149,10 +181,15 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun isValidName(name: String): Boolean {
-        return name.length >= 2 && name.matches(Regex("^[a-zA-Z ]*$"))
+        return name.length >= 5 && name.matches(Regex("^[a-zA-Z ]*$"))
     }
 
     private fun isValidEmail(email: String): Boolean {
         return email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun isValidPassword(password: String): Boolean {
+        val passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=~`\"?><])[A-Za-z\\d!@#$%^&*()_+\\-=~`\"?><]{6,}$"
+        return password.matches(passwordRegex.toRegex())
     }
 }

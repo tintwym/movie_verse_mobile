@@ -14,6 +14,7 @@ import dev.team08.movieverse.databinding.FragmentHomeBinding
 import dev.team08.movieverse.domain.model.Movie
 import dev.team08.movieverse.ui.dashboard.adapters.MovieAdapter
 import dev.team08.movieverse.ui.dashboard.viewmodel.MovieViewModel
+import dev.team08.movieverse.utils.AuthManager
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -30,8 +31,7 @@ class HomeFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -41,11 +41,18 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        checkAuthAndLoadMovies()
         observeViewModel()
     }
 
-    fun updateMovies(movies: List<Movie>) {
-        movieAdapter.submitList(movies)
+    private fun checkAuthAndLoadMovies() {
+        val isLoggedIn = AuthManager.getAuthToken(requireContext()) != null
+        binding.recommendedTitleText.isVisible = isLoggedIn
+        binding.recommendedMoviesRecyclerView.isVisible = isLoggedIn
+
+        if (viewModel.movies.value.isNullOrEmpty()) {
+            viewModel.setLoggedInStatus(isLoggedIn)
+        }
     }
 
     private fun setupRecyclerView() {
@@ -61,13 +68,21 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.movies.observe(viewLifecycleOwner) { movies ->
-            movieAdapter.submitList(movies)
-            binding.moviesRecyclerView.isVisible = movies.isNotEmpty()
+            if (isAdded) {
+                movieAdapter.submitList(movies)
+                binding.moviesRecyclerView.isVisible = movies.isNotEmpty()
+            }
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isAdded) {
+                binding.progressBar.isVisible = isLoading
+            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
-            error?.let {
-                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            if (isAdded && error != null) {
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
         }
     }

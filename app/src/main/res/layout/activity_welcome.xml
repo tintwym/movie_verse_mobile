@@ -23,8 +23,6 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <!-- Placeholder Image -->
-
-    <!-- Text Container -->
     <ImageView
         android:id="@+id/placeholderImage"
         android:layout_width="215dp"
@@ -83,12 +81,31 @@
         android:layout_height="56dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:backgroundTint="#2979FF"
-        android:text="Get started"
+        android:text="Get Started"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/loginRegisterButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Login/Register Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loginRegisterButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="#1A1C1E"
+        android:text="Login / Register"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:cornerRadius="8dp"
+        app:strokeColor="#2979FF"
+        app:strokeWidth="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

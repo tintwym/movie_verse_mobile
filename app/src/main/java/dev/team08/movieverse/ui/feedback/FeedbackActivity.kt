@@ -7,11 +7,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import androidx.security.crypto.MasterKey.*
 import dev.team08.movieverse.databinding.ActivityFeedbackBinding
-import dev.team08.movieverse.domain.model.FeedbackRequest
-import dev.team08.movieverse.data.api.RetrofitInstance
 import dev.team08.movieverse.data.api.ReviewApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException

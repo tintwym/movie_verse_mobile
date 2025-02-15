@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import dev.team08.movieverse.databinding.ActivityWelcomeBinding
 import dev.team08.movieverse.ui.dashboard.DashboardActivity
+import dev.team08.movieverse.ui.login.LoginActivity
 import dev.team08.movieverse.utils.AuthManager
 
 class WelcomeActivity : AppCompatActivity() {
@@ -29,8 +30,16 @@ class WelcomeActivity : AppCompatActivity() {
 
         // Set up click listener for the get started button
         binding.getStartedButton.setOnClickListener {
-            startActivity(Intent(this, DashboardActivity::class.java))
+            val intent = Intent(this, DashboardActivity::class.java).apply {
+                putExtra("EXTRA_FROM_WELCOME", true)
+            }
+            startActivity(intent)
             finish()
+        }
+
+
+        binding.loginRegisterButton.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 }

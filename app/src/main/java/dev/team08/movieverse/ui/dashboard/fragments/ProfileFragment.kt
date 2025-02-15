@@ -2,6 +2,7 @@ package dev.team08.movieverse.ui.dashboard.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,6 +26,14 @@ import retrofit2.Response
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+    private var logoutListener: LogoutListener? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is LogoutListener) {
+            logoutListener = context
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +58,7 @@ class ProfileFragment : Fragment() {
             binding.apply {
                 profileName.text = "Guest"
                 profileUsername.text = "Not logged in"
-                logoutButton.text = "Login"
+                logoutButton.text = "Login / Register"
             }
         } else {
             fetchUserProfile(token)
@@ -97,7 +106,6 @@ class ProfileFragment : Fragment() {
                 if (token.isNullOrEmpty()) {
                     startActivity(Intent(requireContext(), LoginActivity::class.java))
                 } else {
-                    // Launch ProfileActivity with current email
                     val intent = Intent(requireContext(), ProfileActivity::class.java).apply {
                         putExtra("current_email", binding.profileUsername.text.toString())
                     }
@@ -128,12 +136,27 @@ class ProfileFragment : Fragment() {
         }
 
         dialogView.findViewById<TextView>(R.id.logoutButton).setOnClickListener {
-            clearTokenFromSecureStorage()
-            checkAuthAndUpdateUI() // Update UI after logout
-            dialog.dismiss()
+            dialog.dismiss() // Dismiss dialog first
+            performLogout()
         }
 
         dialog.show()
+    }
+
+    private fun performLogout() {
+        try {
+            clearTokenFromSecureStorage()
+            // First update UI
+            binding.apply {
+                profileName.text = "Guest"
+                profileUsername.text = "Not logged in"
+                logoutButton.text = "Login / Register"
+            }
+            // Then notify activity
+            logoutListener?.onLogout()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error during logout: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun clearTokenFromSecureStorage() {
@@ -158,7 +181,6 @@ class ProfileFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PROFILE_UPDATE_REQUEST && resultCode == Activity.RESULT_OK) {
-            // Refresh profile data after update
             val token = getTokenFromSecureStorage()
             if (!token.isNullOrEmpty()) {
                 fetchUserProfile(token)
@@ -169,6 +191,10 @@ class ProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    interface LogoutListener {
+        fun onLogout()
     }
 
     companion object {

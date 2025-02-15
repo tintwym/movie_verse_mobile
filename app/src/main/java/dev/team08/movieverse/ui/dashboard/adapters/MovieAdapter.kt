@@ -6,52 +6,59 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import dev.team08.movieverse.R
 import dev.team08.movieverse.databinding.ItemMovieBinding
 import dev.team08.movieverse.domain.model.Movie
 
-class MovieAdapter(private val onClick: (Movie) -> Unit) :
+class MovieAdapter(private val onMovieClick: (Movie) -> Unit) :
     ListAdapter<Movie, MovieAdapter.MovieViewHolder>(MovieDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
-        val binding = ItemMovieBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemMovieBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return MovieViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
-        val movie = getItem(position)
-        holder.bind(movie)
+        holder.bind(getItem(position))
     }
 
     inner class MovieViewHolder(private val binding: ItemMovieBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(movie: Movie) {
-            binding.apply {
-                movieTitle.text = movie.title
-                movieRating.text = movie.voteAverage?.let {
-                    String.format("%.1f", it)
-                } ?: "N/A"
+            // Set title with null check
+            binding.movieTitle.text = movie.title ?: "Unknown Title"
 
-                val posterUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
+            // Improve rating display
+            binding.movieRating.text = movie.getRating()
 
-                Glide.with(root)
-                    .load(posterUrl)
-                    .placeholder(dev.team08.movieverse.R.drawable.ic_image_placeholder)
-                    .error(dev.team08.movieverse.R.drawable.ic_image_placeholder)
-                    .into(moviePoster)
+            // Enhanced image loading with more robust error handling
+            Glide.with(binding.root.context)
+                .load(movie.getFullPosterPath())
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
+                .fallback(R.drawable.placeholder_image)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(binding.moviePoster)
 
-                root.setOnClickListener {
-                    onClick(movie)
-                }
+            binding.root.setOnClickListener {
+                onMovieClick(movie)
             }
         }
     }
-}
 
-class MovieDiffCallback : DiffUtil.ItemCallback<Movie>() {
-    override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean =
-        oldItem.id == newItem.id
+    private class MovieDiffCallback : DiffUtil.ItemCallback<Movie>() {
+        override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean =
-        oldItem == newItem
+        override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean {
+            return oldItem == newItem
+        }
+    }
 }
