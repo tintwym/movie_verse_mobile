@@ -30,6 +30,63 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
         loadPopularMovies()
     }
 
+    // Add this at the top of MovieViewModel with other LiveData declarations
+    private val _recommendedMovies = MutableLiveData<List<Movie>>()
+    val recommendedMovies: LiveData<List<Movie>> = _recommendedMovies
+
+    // Add these movie IDs after your class variables
+    private val recommendedMovieIds = listOf(
+        550,  // Fight Club
+        238,  // The Godfather
+        424,  // Schindler's List
+        680,  // Pulp Fiction
+        155   // The Dark Knight
+    )
+
+    // Add this function to your MovieViewModel class
+    fun loadRecommendedMovies() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val recommendedMoviesList = mutableListOf<Movie>()
+
+                for (movieId in recommendedMovieIds) {
+                    try {
+                        val movieDetail = MovieApiClient.apiService.getMovieDetails(
+                            movieId = movieId,
+                            apiKey = Constants.API_KEY
+                        )
+                        Log.d("MovieViewModel", "Movie detail loaded: ${movieDetail.title}, poster: ${movieDetail.posterPath}")
+
+                        // Convert MovieDetailResponse to Movie
+                        val movie = Movie(
+                            id = movieDetail.id,
+                            title = movieDetail.title,
+                            overview = movieDetail.overview,
+                            posterPath = movieDetail.posterPath,
+                            backdropPath = movieDetail.backdropPath,
+                            releaseDate = movieDetail.releaseDate,
+                            voteAverage = movieDetail.voteAverage,
+                            runtime = movieDetail.runtime,
+                            genres = movieDetail.genres
+                        )
+                        recommendedMoviesList.add(movie)
+                    } catch (e: Exception) {
+                        Log.e("MovieViewModel", "Error loading movie details for ID: $movieId", e)
+                    }
+                }
+
+                _recommendedMovies.value = recommendedMoviesList
+                Log.d("MovieViewModel", "Recommended movies loaded: ${recommendedMoviesList.size}")
+            } catch (e: Exception) {
+                Log.e("MovieViewModel", "Error loading recommended movies", e)
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun loadPopularMovies() {
         viewModelScope.launch {
             _isLoading.value = true

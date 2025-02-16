@@ -31,23 +31,25 @@ class MovieAdapter(private val onMovieClick: (Movie) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(movie: Movie) {
-            // Set title with null check
-            binding.movieTitle.text = movie.title ?: "Unknown Title"
+            binding.apply {
+                // Use null-safe title
+                movieTitle.text = movie.title ?: "Unknown Title"
 
-            // Improve rating display
-            binding.movieRating.text = movie.getRating()
+                // Use the getRating() helper function
+                movieRating.text = movie.getRating()
 
-            // Enhanced image loading with more robust error handling
-            Glide.with(binding.root.context)
-                .load(movie.getFullPosterPath())
-                .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.placeholder_image)
-                .fallback(R.drawable.placeholder_image)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .into(binding.moviePoster)
+                // Use the getFullPosterPath() helper function
+                Glide.with(root.context)
+                    .load(movie.getFullPosterPath())
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .centerCrop()
+                    .into(moviePoster)
 
-            binding.root.setOnClickListener {
-                onMovieClick(movie)
+                root.setOnClickListener {
+                    onMovieClick(movie)
+                }
             }
         }
     }

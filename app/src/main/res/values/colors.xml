@@ -24,4 +24,13 @@
     <color name="darkerGray">#2A2E33</color>
     <color name="background_dark">#1F1F1F</color>
     <color name="red">#FF0000</color>
+    <color name="green">#4CAF50</color>
+
+    <!-- Background colors for reviews -->
+    <color name="review_positive">#4CAF50</color> <!-- Green for positive reviews -->
+    <color name="review_negative">#D65647</color> <!-- Red for negative reviews -->
+    <color name="review_default">#FFFFFF</color> <!-- Default background -->
+
+    <!-- Text colors -->
+    <color name="default_date_color">#757575</color>
 </resources>

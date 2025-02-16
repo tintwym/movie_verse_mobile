@@ -123,10 +123,6 @@ class DashboardActivity : AppCompatActivity(), HomeFragment.MovieClickListener {
                 searchResultsAdapter.submitList(movies)
                 binding.noResultsView.visibility =
                     if (movies.isEmpty()) View.VISIBLE else View.GONE
-            } else {
-                // Update your HomeFragment's movie list
-                val homeFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer) as? HomeFragment
-                homeFragment?.updateMovies(movies)
             }
         }
 

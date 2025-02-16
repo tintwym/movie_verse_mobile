@@ -42,7 +42,7 @@ class NewsFragment : Fragment() {
         }
 
         binding.newsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = movieAdapter
             setHasFixedSize(true)
         }

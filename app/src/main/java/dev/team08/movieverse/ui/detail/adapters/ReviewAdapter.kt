@@ -1,10 +1,13 @@
 package dev.team08.movieverse.ui.detail.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import dev.team08.movieverse.R
 import dev.team08.movieverse.databinding.ItemReviewBinding
 import dev.team08.movieverse.domain.model.Review
 import java.text.SimpleDateFormat
@@ -31,6 +34,24 @@ class ReviewAdapter : ListAdapter<Review, ReviewAdapter.ReviewViewHolder>(Review
                 username.text = review.user.username
                 reviewText.text = review.originalReviewText
                 createdAt.text = formatDate(review.createdAt)
+
+                val sentiment = review.reviewSentiment?.toIntOrNull() ?: -1
+
+                // Set color based on review text
+                when (sentiment) {
+                    1 -> { // Positive Review
+                        root.setBackgroundColor(ContextCompat.getColor(root.context, R.color.review_positive))
+                        createdAt.setTextColor(ContextCompat.getColor(root.context, R.color.white)) // White text for date
+                    }
+                    0 -> { // Negative Review
+                        root.setBackgroundColor(ContextCompat.getColor(root.context, R.color.review_negative))
+                        createdAt.setTextColor(ContextCompat.getColor(root.context, R.color.black)) // Black text for date
+                    }
+                    else -> { // Default Review
+                        root.setBackgroundColor(ContextCompat.getColor(root.context, R.color.review_default))
+                        createdAt.setTextColor(ContextCompat.getColor(root.context, R.color.default_date_color)) // Default text color
+                    }
+                }
             }
         }
 
