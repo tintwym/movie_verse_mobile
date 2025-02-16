@@ -52,9 +52,9 @@ class HomeFragment : Fragment() {
         viewModel.loadPopularMovies()
 
         if (isUserLoggedIn) {
-            viewModel.loadRecommendedMovies() // Only load recommended movies if logged in
+            viewModel.loadRecommendedMovies(isUserLoggedIn) // Only load recommended movies if logged in
         } else {
-            hideRecommendedMovies()
+            hideRecommendedMovies() // Hide recommendation UI for guests
         }
     }
 
@@ -87,10 +87,16 @@ class HomeFragment : Fragment() {
 
         viewModel.recommendedMovies.observe(viewLifecycleOwner) { movies ->
             if (isUserLoggedIn) {  // Only update if user is logged in
-                recommendedMoviesAdapter.submitList(movies)
-                binding.recommendedMoviesRecyclerView.isVisible = movies.isNotEmpty()
-                binding.recommendedMoviesLabel.isVisible = movies.isNotEmpty()
-                binding.noRecommendationsText.isVisible = movies.isEmpty() // Show text when no movies
+                val hasRecommendations = movies.isNotEmpty()
+
+                binding.recommendedMoviesRecyclerView.isVisible = hasRecommendations
+                binding.recommendedMoviesLabel.isVisible = hasRecommendations
+                binding.noRecommendationsText.isVisible = !hasRecommendations // Show if empty
+            } else {
+                // Hide recommendation section completely for guest users
+                binding.recommendedMoviesRecyclerView.isVisible = false
+                binding.recommendedMoviesLabel.isVisible = false
+                binding.noRecommendationsText.isVisible = false
             }
         }
 

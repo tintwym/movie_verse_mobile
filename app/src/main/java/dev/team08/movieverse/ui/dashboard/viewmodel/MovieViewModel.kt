@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dev.team08.movieverse.common.Constants
 import dev.team08.movieverse.data.api.MovieApiClient
+import dev.team08.movieverse.data.api.RecommendApiClient
 import dev.team08.movieverse.data.repository.MovieRepository
 import dev.team08.movieverse.domain.model.Movie
 import kotlinx.coroutines.Job
@@ -26,39 +27,49 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     private val _upcomingMovies = MutableLiveData<List<Movie>>()
     val upcomingMovies: LiveData<List<Movie>> = _upcomingMovies
 
+    private val _recommendedMovies = MutableLiveData<List<Movie>>()
+    val recommendedMovies: LiveData<List<Movie>> = _recommendedMovies
+
     init {
         loadPopularMovies()
     }
 
-    // Add this at the top of MovieViewModel with other LiveData declarations
-    private val _recommendedMovies = MutableLiveData<List<Movie>>()
-    val recommendedMovies: LiveData<List<Movie>> = _recommendedMovies
+    fun loadRecommendedMovies(isUserLoggedIn: Boolean) {
+        if (!isUserLoggedIn) {
+            Log.d("MovieViewModel", "User is not logged in. Hiding recommended movies.")
+            _recommendedMovies.value = emptyList() // Ensure UI hides recommendations for guests
+            return
+        }
 
-    // Add these movie IDs after your class variables
-    private val recommendedMovieIds = listOf(
-        550,  // Fight Club
-        238,  // The Godfather
-        424,  // Schindler's List
-        680,  // Pulp Fiction
-        155   // The Dark Knight
-    )
-
-    // Add this function to your MovieViewModel class
-    fun loadRecommendedMovies() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                // Fetch recommended movie IDs from API
+                val recommendedMovieIds = try {
+                    RecommendApiClient.apiService.getRecommendedMovieIds()
+                } catch (e: Exception) {
+                    Log.e("MovieViewModel", "Error fetching recommended movie IDs", e)
+                    null // Return null if API call fails
+                }
+
+                // Check if response is null or empty
+                if (recommendedMovieIds.isNullOrEmpty()) {
+                    Log.d("MovieViewModel", "No recommended movies available for logged-in user.")
+                    _recommendedMovies.value = emptyList() // Show "No recommendations available"
+                    return@launch
+                }
+
                 val recommendedMoviesList = mutableListOf<Movie>()
 
                 for (movieId in recommendedMovieIds) {
                     try {
+                        Log.d("MovieViewModel", "Fetching details for movie ID: $movieId")
+
                         val movieDetail = MovieApiClient.apiService.getMovieDetails(
                             movieId = movieId,
                             apiKey = Constants.API_KEY
                         )
-                        Log.d("MovieViewModel", "Movie detail loaded: ${movieDetail.title}, poster: ${movieDetail.posterPath}")
 
-                        // Convert MovieDetailResponse to Movie
                         val movie = Movie(
                             id = movieDetail.id,
                             title = movieDetail.title,
@@ -71,30 +82,17 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                             genres = movieDetail.genres
                         )
                         recommendedMoviesList.add(movie)
+
+                        Log.d("MovieViewModel", "Movie added: ${movie.title}")
+
                     } catch (e: Exception) {
                         Log.e("MovieViewModel", "Error loading movie details for ID: $movieId", e)
                     }
                 }
 
                 _recommendedMovies.value = recommendedMoviesList
-                Log.d("MovieViewModel", "Recommended movies loaded: ${recommendedMoviesList.size}")
             } catch (e: Exception) {
                 Log.e("MovieViewModel", "Error loading recommended movies", e)
-                _error.value = e.message
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    fun loadPopularMovies() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val response = MovieApiClient.apiService.getPopularMovies()
-                _movies.value = response.results
-            } catch (e: Exception) {
-                Log.e("MovieViewModel", "Error loading movies", e)
                 _error.value = e.message
             } finally {
                 _isLoading.value = false
@@ -133,6 +131,21 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                 _upcomingMovies.value = response.results
             } catch (e: Exception) {
                 Log.e("MovieViewModel", "Error loading upcoming movies", e)
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadPopularMovies() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = MovieApiClient.apiService.getPopularMovies()
+                _movies.value = response.results
+            } catch (e: Exception) {
+                Log.e("MovieViewModel", "Error loading movies", e)
                 _error.value = e.message
             } finally {
                 _isLoading.value = false
