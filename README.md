@@ -1,81 +1,53 @@
-MovieVerse Mobile App
+# Movie Verse Mobile
 
-MovieVerse is a mobile application designed to provide users with movie information, reviews, and more.
+Movie Verse Mobile is a Kotlin-based Android application that provides users with information about movies, including details, ratings, and recommendations.
 
-Features
+## Features
 
-Browse popular movies
+- Browse popular and trending movies
+- View detailed movie information
+- Search for movies
+- Save favorite movies for later
+- Dark mode support
 
-Search for movies by title
+## Tech Stack
 
-View detailed information about each movie
+- **Language:** Kotlin
+- **Architecture:** MVVM (Model-View-ViewModel)
+- **Networking:** Retrofit
+- **Dependency Injection:** Hilt
+- **Asynchronous Operations:** Coroutines
+- **Database:** Room
+- **UI Components:** Jetpack Compose / XML (if applicable)
 
-Save favorite movies
+## Installation & Setup
 
-Tech Stack
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/movie-verse-mobile.git
+   cd movie-verse-mobile
+   ```
 
-Language: Kotlin
+2. Open the project in **Android Studio**.
 
-Framework: Android SDK
+3. Sync dependencies by clicking **"Sync Project with Gradle Files"**.
 
-Architecture: MVVM
+4. Run the application on an emulator or a physical device.
 
-Networking: Retrofit
+## Usage
 
-Dependency Injection: Hilt
+- Launch the app to explore trending and popular movies.
+- Search for specific movies by title.
+- Click on a movie to view details.
+- Save movies to your favorites list.
 
-Database: Room
+## Contributing
 
-Project Structure
+1. Fork the repository.
+2. Create a new branch (`feature/your-feature`).
+3. Commit your changes.
+4. Push to the branch and create a pull request.
 
-movie_verse_mobile/
-├── app/                # Main application module
-│   ├── src/main/java/  # Application source code
-│   ├── src/main/res/   # Resources (layouts, drawables, etc.)
-├── build.gradle.kts    # Project build configuration
-├── settings.gradle.kts # Gradle settings
-└── gradle/             # Gradle wrapper files
+## License
 
-Installation
-
-Prerequisites
-
-Android Studio (latest version recommended)
-
-JDK 11 or later
-
-Gradle (handled by Android Studio)
-
-Steps
-
-Clone the repository:
-
-git clone https://github.com/your-repo/movie_verse_mobile.git
-
-Open the project in Android Studio.
-
-Sync Gradle files and install dependencies.
-
-Run the application on an emulator or physical device.
-
-API Integration
-
-This application fetches movie data from an external API using Retrofit.
-Ensure you have an API key and configure it in the appropriate file.
-
-Contributing
-
-Feel free to contribute to this project! Follow these steps:
-
-Fork the repository.
-
-Create a new branch for your feature.
-
-Commit your changes.
-
-Push to your fork and submit a pull request.
-
-License
-
-This project is licensed under the MIT License.
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
