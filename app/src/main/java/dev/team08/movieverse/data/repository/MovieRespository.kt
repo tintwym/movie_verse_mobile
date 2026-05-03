@@ -12,7 +12,6 @@ class MovieRepository {
     private var genresMap: Map<Int, String> = emptyMap()
 
     suspend fun getPopularMovies(apiKey: String): List<Movie> {
-        Log.d("MovieRepository", "Fetching popular movies")
         return try {
             if (genresMap.isEmpty()) {
                 val genreResponse = movieApiService.getGenres(apiKey)
@@ -29,7 +28,6 @@ class MovieRepository {
 
     // Changed from private to public
     suspend fun getMoviesByIds(movieIds: List<Int>, apiKey: String): List<Movie> {
-        Log.d("MovieRepository", "Fetching movies by IDs: $movieIds")
         return try {
             if (genresMap.isEmpty()) {
                 val genreResponse = movieApiService.getGenres(apiKey)
@@ -41,7 +39,6 @@ class MovieRepository {
                     async {
                         try {
                             val movieDetails = movieApiService.getMovieDetails(movieId, apiKey)
-                            Log.d("MovieRepository", "Got details for movie $movieId")
 
                             val genres = movieDetails.genres?.map { genre ->
                                 Genre(genre.id, genresMap[genre.id] ?: genre.name)
@@ -78,7 +75,6 @@ class MovieRepository {
                 async {
                     try {
                         val movieDetails = movieApiService.getMovieDetails(movie.id, apiKey)
-                        Log.d("MovieRepository", "Processing movie ${movie.id}")
 
                         val genres = movie.genreIds?.mapNotNull { genreId ->
                             genresMap[genreId]?.let { genreName ->

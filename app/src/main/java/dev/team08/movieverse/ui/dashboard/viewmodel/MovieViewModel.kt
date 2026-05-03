@@ -36,7 +36,6 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadRecommendedMovies(isUserLoggedIn: Boolean) {
         if (!isUserLoggedIn) {
-            Log.d("MovieViewModel", "User is not logged in. Hiding recommended movies.")
             _recommendedMovies.value = emptyList() // Ensure UI hides recommendations for guests
             return
         }
@@ -54,7 +53,6 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Check if response is null or empty
                 if (recommendedMovieIds.isNullOrEmpty()) {
-                    Log.d("MovieViewModel", "No recommended movies available for logged-in user.")
                     _recommendedMovies.value = emptyList() // Show "No recommendations available"
                     return@launch
                 }
@@ -63,8 +61,6 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
 
                 for (movieId in recommendedMovieIds) {
                     try {
-                        Log.d("MovieViewModel", "Fetching details for movie ID: $movieId")
-
                         val movieDetail = MovieApiClient.apiService.getMovieDetails(
                             movieId = movieId,
                             apiKey = Constants.API_KEY
@@ -82,8 +78,6 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                             genres = movieDetail.genres
                         )
                         recommendedMoviesList.add(movie)
-
-                        Log.d("MovieViewModel", "Movie added: ${movie.title}")
 
                     } catch (e: Exception) {
                         Log.e("MovieViewModel", "Error loading movie details for ID: $movieId", e)

@@ -29,15 +29,12 @@ class CastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("CastFragment", "onViewCreated called")
-
         binding.castRecyclerView.apply {
             adapter = castAdapter
             layoutManager = LinearLayoutManager(context)
         }
 
-        val movieId = arguments?.getInt(ARG_MOVIE_ID)  // Fixed asterisk
-        Log.d("CastFragment", "Movie ID from arguments: $movieId")
+        val movieId = arguments?.getInt(ARG_MOVIE_ID)
 
         if (movieId == null) {
             Log.e("CastFragment", "No movie ID provided")
@@ -50,20 +47,14 @@ class CastFragment : Fragment() {
     private fun fetchMovieCast(movieId: Int) {
         lifecycleScope.launch {
             try {
-                Log.d("CastFragment", "Fetching cast for movie ID: $movieId")
-
                 val response = CastApiService.instance.getMovieCast(
                     movieId = movieId,
                     apiKey = Constants.API_KEY
                 )
 
-                Log.d("CastFragment", "Cast response received: ${response.cast.size} items")
-
                 if (response.cast.isNotEmpty()) {
-                    Log.d("CastFragment", "Submitting cast list to adapter")
                     castAdapter.submitList(response.cast)
                 } else {
-                    Log.d("CastFragment", "No cast available")
                     Toast.makeText(requireContext(), "No cast available.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {

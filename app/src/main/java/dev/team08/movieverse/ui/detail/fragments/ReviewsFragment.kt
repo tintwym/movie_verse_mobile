@@ -78,11 +78,6 @@ class ReviewsFragment : Fragment() {
                             showReviews(reviews)
                         }
 
-                        // Add logging to debug response
-                        Log.d(TAG, "Reviews received: ${reviews.size}")
-                        reviews.forEach { review ->
-                            Log.d(TAG, "Review: ${review.originalReviewText} by ${review.user.username}")
-                        }
                     },
                     onFailure = { exception ->
                         hideLoading()

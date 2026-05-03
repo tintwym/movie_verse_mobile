@@ -31,8 +31,6 @@ class FeedbackActivity : AppCompatActivity() {
         movieId = intent.getIntExtra("movieId", -1)
         movieTitle = intent.getStringExtra("movieTitle") ?: "Unknown Movie"
 
-        Log.d(TAG, "Received movieId: $movieId, movieTitle: $movieTitle")
-
         if (movieId == -1) {
             Toast.makeText(this, "Invalid movie data", Toast.LENGTH_SHORT).show()
             finish()
@@ -87,8 +85,7 @@ class FeedbackActivity : AppCompatActivity() {
                         binding.editButton.visibility = View.VISIBLE // Show edit button
                         binding.submitButton.isEnabled = false // Disable submit button until edit
                     },
-                    onFailure = { exception ->
-                        Log.d(TAG, "No existing review found or error occurred", exception)
+                    onFailure = {
                         binding.reviewContent.isEnabled = true // Enable editing for new review
                         binding.editButton.visibility = View.GONE
                         binding.submitButton.isEnabled = true
